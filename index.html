@@ -37,10 +37,17 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     -webkit-font-smoothing:antialiased;
     display:flex; justify-content:center;
-    padding:22px 20px 48px; min-height:100dvh;
+    padding:calc(22px + var(--tk-top,0px)) 20px calc(48px + var(--tk-bot,0px)); min-height:100dvh;
     transition:background .35s;
   }
   .app{width:100%;max-width:440px;display:flex;flex-direction:column;}
+
+  /* ── Ampliación 120% al explorar desde PC ── */
+  @media (min-width:900px) and (hover:hover) and (pointer:fine){
+    body:not(.nozoom) .app{zoom:1.2;}
+    body:not(.nozoom) .ticker.pos-top,
+    body:not(.nozoom) .ticker.pos-bottom{--ui:1.2;}
+  }
 
   .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
   .brand{font-size:11px;font-weight:800;letter-spacing:.22em;color:var(--accent);}
@@ -173,6 +180,77 @@
   .card .note{font-size:10.5px;letter-spacing:.03em;opacity:.65;text-align:center;margin-top:14px;line-height:1.5;}
   .card .foot{font-size:9.5px;letter-spacing:.2em;font-weight:700;opacity:.5;text-align:center;margin-top:18px;}
   .view[hidden]{display:none;}
+
+  /* ────────────── AJUSTES DEL TICKER ────────────── */
+  .group-title{font-size:10.5px;font-weight:800;letter-spacing:.18em;color:var(--accent);padding:18px 0 4px;border-top:2px solid var(--accent);margin-top:6px;}
+  .range{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--soft);outline:none;margin:0;cursor:pointer;}
+  .range::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:22px;background:var(--accent);border:none;border-radius:0;cursor:pointer;}
+  .range::-moz-range-thumb{width:14px;height:22px;background:var(--accent);border:none;border-radius:0;cursor:pointer;}
+  .range-row{display:grid;grid-template-columns:104px 1fr 56px;align-items:center;gap:12px;}
+  .range-row .rl{font-size:11.5px;font-weight:700;}
+  .range-row .rv{font-size:11.5px;font-weight:800;text-align:right;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .sw{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--muted);}
+  .sw input{width:100%;height:34px;border:none;padding:0;background:var(--soft);cursor:pointer;}
+  .sw input::-webkit-color-swatch-wrapper{padding:0;}
+  .sw input::-webkit-color-swatch{border:none;}
+  .sw input::-moz-color-swatch{border:none;}
+
+  /* ────────────── TICKER NEWS (doble) ────────────── */
+  .ticker{
+    --ui:1; --tk-fs:14; --tk-bg:#0A0A0C; --tk-text:#FFFFFF; --tk-l1:#0B4DBB; --tk-l2:#D01F2E;
+    --tk-l1t:#FFFFFF; --tk-l2t:#FFFFFF; --up:#2F80FF; --down:#E5283A;
+    --sub:color-mix(in srgb, var(--tk-text) 72%, var(--tk-bg));
+    font-size:calc(var(--tk-fs) * 1px * var(--ui));
+    background:var(--tk-bg); color:var(--tk-text);
+    font-family:inherit; z-index:50; user-select:none; -webkit-user-select:none;
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--tk-text) 10%, transparent);
+  }
+  .ticker[hidden]{display:none;}
+  .ticker.pos-top,.ticker.pos-bottom{position:fixed;left:0;right:0;}
+  .ticker.pos-top{top:0;}
+  .ticker.pos-bottom{bottom:0;padding-bottom:env(safe-area-inset-bottom);}
+  .ticker.pos-inline{position:relative;margin-bottom:26px;}
+  .ticker::before{content:"";display:block;height:.22em;background:linear-gradient(90deg,var(--tk-l1) 50%,var(--tk-l2) 50%);}
+
+  .tk-row{display:flex;height:2.7em;overflow:hidden;position:relative;}
+  .tk-row + .tk-row{border-top:1px solid color-mix(in srgb, var(--tk-text) 16%, transparent);background:color-mix(in srgb, var(--tk-bg) 90%, var(--tk-text) 10%);}
+  .tk-row[data-row="0"]{--rc:var(--tk-l1);--rct:var(--tk-l1t);}
+  .tk-row[data-row="1"]{--rc:var(--tk-l2);--rct:var(--tk-l2t);}
+
+  .tk-label{
+    flex:none;display:flex;align-items:center;gap:.5em;position:relative;z-index:2;
+    background:var(--rc);color:var(--rct);
+    padding:0 2em 0 1em;font-weight:900;font-size:.78em;letter-spacing:.16em;white-space:nowrap;
+    clip-path:polygon(0 0,100% 0,calc(100% - 1.1em) 100%,0 100%);
+  }
+  .tk-label .ic{font-size:1.35em;letter-spacing:0;}
+
+  .tk-view{
+    flex:1;min-width:0;overflow:hidden;position:relative;display:flex;align-items:center;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 1.4em,#000 calc(100% - 1.4em),transparent);
+            mask-image:linear-gradient(90deg,transparent 0,#000 1.4em,#000 calc(100% - 1.4em),transparent);
+  }
+  .tk-track{display:flex;width:max-content;align-items:center;white-space:nowrap;will-change:transform;backface-visibility:hidden;}
+  .tk-set{display:flex;flex:none;align-items:center;}
+
+  .tk-item{display:inline-flex;align-items:center;gap:.6em;padding-right:3em;position:relative;flex:none;}
+  .tk-item::after{content:"";position:absolute;right:1.2em;top:50%;width:.42em;height:.42em;background:var(--rc);transform:translateY(-50%) rotate(45deg);}
+  .tk-item .ie{font-size:1.25em;line-height:1;letter-spacing:.1em;}
+  .tk-item .tr{font-size:.78em;font-weight:900;}
+  .tk-item .tr.up{color:var(--up);}
+  .tk-item .tr.down{color:var(--down);}
+  .tk-item .tr.n{color:var(--sub);}
+  .tk-item .hd{font-weight:800;letter-spacing:.01em;}
+  .tk-item .dt{color:var(--sub);font-weight:500;}
+  .tk-item .sr{font-style:normal;font-size:.62em;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:.28em .6em;background:var(--rc);color:var(--rct);}
+  .ticker.heads .dt{display:none;}
+  .ticker.nosrc .sr{display:none;}
+
+  @media (max-width:560px){
+    .tk-label .txt{display:none;}
+    .tk-label{padding:0 1.6em 0 .8em;}
+  }
 </style>
 </head>
 <body data-mode="soldado" data-theme="light">
@@ -241,6 +319,108 @@
       </div>
       <button class="switch" id="boldSwitch" role="switch" aria-checked="false"><span></span></button>
     </div>
+
+    <div class="group-title">📰 TICKER NEWS</div>
+
+    <div class="setting">
+      <div>
+        <div class="row-title">📺 Mostrar ticker</div>
+        <div class="row-sub">Doble barra de noticias tipo canal de finanzas.</div>
+      </div>
+      <button class="switch" id="tkOn" role="switch" aria-checked="true"><span></span></button>
+    </div>
+
+    <div class="setting col">
+      <div class="row-title">📍 Ubicación</div>
+      <div class="chips" id="tkPosChips">
+        <button class="chip" data-pos="top">⬆️ Arriba</button>
+        <button class="chip" data-pos="bottom" aria-pressed="true">⬇️ Abajo</button>
+        <button class="chip" data-pos="inline">▤ Integrado</button>
+      </div>
+    </div>
+
+    <div class="setting col">
+      <div class="row-title">⚡ Velocidad (píxeles por segundo)</div>
+      <div class="range-row">
+        <span class="rl">💧 Fila 1</span>
+        <input type="range" class="range" id="tkS1" min="15" max="240" step="5" value="55">
+        <span class="rv" id="tkS1v">55</span>
+      </div>
+      <div class="range-row">
+        <span class="rl">🌍 Fila 2</span>
+        <input type="range" class="range" id="tkS2" min="15" max="240" step="5" value="95">
+        <span class="rv" id="tkS2v">95</span>
+      </div>
+    </div>
+
+    <div class="setting col">
+      <div class="row-title">🔠 Tamaño del texto</div>
+      <div class="range-row">
+        <span class="rl">Letra</span>
+        <input type="range" class="range" id="tkFs" min="11" max="24" step="1" value="14">
+        <span class="rv" id="tkFsv">14 px</span>
+      </div>
+    </div>
+
+    <div class="setting col">
+      <div class="row-title">🎨 Colores</div>
+      <div class="chips" id="tkThemeChips">
+        <button class="chip" data-tkt="clasico" aria-pressed="true">Clásico</button>
+        <button class="chip" data-tkt="azul">Azul</button>
+        <button class="chip" data-tkt="rojo">Alerta</button>
+        <button class="chip" data-tkt="blanco">Blanco</button>
+      </div>
+      <div class="swatches">
+        <label class="sw"><input type="color" id="tkC_bg" value="#0A0A0C">FONDO</label>
+        <label class="sw"><input type="color" id="tkC_text" value="#FFFFFF">TEXTO</label>
+        <label class="sw"><input type="color" id="tkC_l1" value="#0B4DBB">FILA 1</label>
+        <label class="sw"><input type="color" id="tkC_l2" value="#D01F2E">FILA 2</label>
+      </div>
+    </div>
+
+    <div class="setting col">
+      <div class="row-title">🗞️ Contenido</div>
+      <div class="chips" id="tkContentChips">
+        <button class="chip" data-content="full" aria-pressed="true">Titular + detalle</button>
+        <button class="chip" data-content="heads">Solo titulares</button>
+      </div>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="row-title">🏷️ Mostrar fuente</div>
+        <div class="row-sub">Etiqueta con la fuente de cada dato.</div>
+      </div>
+      <button class="switch" id="tkSrc" role="switch" aria-checked="true"><span></span></button>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="row-title">⏸️ Pausar al pasar el mouse</div>
+        <div class="row-sub">Solo en computador.</div>
+      </div>
+      <button class="switch" id="tkPause" role="switch" aria-checked="true"><span></span></button>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="row-title">↔️ Sentidos opuestos</div>
+        <div class="row-sub">La fila 2 corre en dirección contraria.</div>
+      </div>
+      <button class="switch" id="tkOpp" role="switch" aria-checked="false"><span></span></button>
+    </div>
+
+    <div class="setting">
+      <div>
+        <div class="row-title">🖥️ Ampliar 120% en PC</div>
+        <div class="row-sub">Agranda la app al abrirla desde un computador.</div>
+      </div>
+      <button class="switch" id="tkZoom" role="switch" aria-checked="true"><span></span></button>
+    </div>
+
+    <div class="setting">
+      <button class="chip" id="tkReset">↺ Restablecer ticker</button>
+    </div>
   </div>
 
   <section class="view" id="idleView">
@@ -298,6 +478,17 @@
     <button class="btn alt" id="againBtn">🔄 OTRO BAÑO</button>
   </section>
 
+</div>
+
+<div class="ticker pos-bottom" id="ticker" role="region" aria-label="Noticias sobre agua e higiene">
+  <div class="tk-row" data-row="0">
+    <div class="tk-label"><span class="ic">💧</span><span class="txt">DUCHA</span></div>
+    <div class="tk-view"><div class="tk-track"></div></div>
+  </div>
+  <div class="tk-row" data-row="1">
+    <div class="tk-label"><span class="ic">🌍</span><span class="txt">MUNDO</span></div>
+    <div class="tk-view"><div class="tk-track"></div></div>
+  </div>
 </div>
 
 <script>
@@ -1087,6 +1278,246 @@ $('againBtn').addEventListener('click', () => {
   renderChartStructure();
   updateEnergyLabel();
 })();
+
+/* ══════════════ TICKER NEWS DOBLE ══════════════ */
+/* t: 'up' ▲ sube · 'down' ▼ baja · 'n' ◆ dato */
+const TK_DATA = [
+  [ /* FILA 1 · DUCHA */
+    {e:'🚿⏱️', t:'n',    h:'8,1 minutos por ducha', d:'Un estudio citado en una investigación sobre consumo de agua encontró un tiempo medio declarado de ducha de 8,1 minutos en datos procedentes de 18 países.', s:'Frontiers'},
+    {e:'🏠💧', t:'n',    h:'17 % del agua interior residencial', d:'En Estados Unidos, las duchas representan aproximadamente el 17 % del consumo de agua dentro de las viviendas, según la EPA.', s:'US EPA'},
+    {e:'🚿📏', t:'n',    h:'9,46 litros por minuto', d:'Una ducha convencional estadounidense que consume 2,5 galones por minuto utiliza aproximadamente 9,46 litros por minuto.', s:'US EPA'},
+    {e:'🪣🧮', t:'n',    h:'76,7 litros por ducha', d:'Una ducha de 8,1 minutos con un cabezal de 2,5 galones por minuto consumiría aproximadamente 76,7 litros. Es un cálculo ilustrativo, no un promedio mundial medido.', s:'Cálculo'},
+    {e:'⏳📆', t:'n',    h:'49,3 horas al año bajo la ducha', d:'Si una persona se ducha una vez al día durante 8,1 minutos, acumula unas 49,3 horas anuales de ducha. Es una proyección matemática, no una media observada por país.', s:'Proyección'},
+    {e:'🛢️💧', t:'n',    h:'28.000 litros al año', d:'Con una ducha diaria de 76,7 litros, el consumo anual sería de aproximadamente 28.000 litros por persona.', s:'Cálculo'},
+    {e:'✅🚿', t:'n',    h:'2,0 galones por minuto como máximo', d:'Los cabezales certificados WaterSense de la EPA deben consumir como máximo 2,0 galones por minuto, frente a los 2,5 de una ducha convencional estándar estadounidense.', s:'US EPA'},
+    {e:'📉💧', t:'down', h:'20 % menos agua', d:'Pasar de un cabezal de 2,5 a uno de 2,0 galones por minuto reduce en un 20 % el caudal nominal.', s:'Cálculo'},
+    {e:'💧➖', t:'down', h:'15,3 litros ahorrados en 8,1 minutos', d:'Manteniendo la misma duración, el cambio de un cabezal de 2,5 a uno de 2,0 galones por minuto ahorraría aproximadamente 15,3 litros por ducha.', s:'Cálculo'},
+    {e:'🌱📉', t:'down', h:'5.600 litros de ahorro anual', d:'Con una ducha diaria de 8,1 minutos, el ahorro calculado al cambiar de cabezal sería de unos 5.600 litros por persona al año.', s:'Cálculo'},
+    {e:'👨‍👩‍👧‍👦🚿', t:'n', h:'40 galones diarios por familia', d:'La EPA estima que las duchas consumen cerca de 40 galones diarios para una familia estadounidense promedio.', s:'US EPA'},
+    {e:'🌎🌊', t:'n',    h:'1,2 billones de galones anuales', d:'La EPA calcula que en Estados Unidos se utilizan cerca de 1,2 billones de galones estadounidenses al año solamente para ducharse.', s:'US EPA'},
+    {e:'5️⃣⏱️', t:'n',   h:'Una ducha de 5 minutos', d:'Con un caudal convencional de 2,5 galones por minuto, una ducha de cinco minutos consume aproximadamente 47,3 litros.', s:'Cálculo'},
+    {e:'🔟⏱️', t:'up',   h:'Una ducha de 10 minutos', d:'Con ese mismo caudal, una ducha de diez minutos consume aproximadamente 94,6 litros.', s:'Cálculo'},
+    {e:'➕💧', t:'up',   h:'47,3 litros adicionales', d:'Duplicar una ducha de cinco a diez minutos añade unos 47,3 litros de consumo con un caudal constante de 2,5 galones por minuto.', s:'Cálculo'},
+    {e:'🏆💦', t:'down', h:'10.200 litros de ahorro anual por hogar', d:'Una familia que ahorrara 2.700 galones estadounidenses al año evitaría consumir unos 10.200 litros anuales. La EPA cita ahorros de hasta 2.700 galones al año por instalar un cabezal WaterSense en el hogar.', s:'US EPA'},
+    {e:'⚖️🚿', t:'n',    h:'La duración no es el único factor', d:'Dos personas que se duchan durante el mismo tiempo pueden consumir volúmenes diferentes si sus cabezales tienen caudales distintos.', s:'Nota'},
+    {e:'🔥⚡', t:'n',    h:'El agua caliente también tiene un coste energético', d:'Reducir el consumo de agua caliente puede disminuir tanto el gasto de agua como la energía necesaria para calentarla.', s:'US EPA'},
+    {e:'🌐⚠️', t:'n',    h:'El promedio no describe a todos los países', d:'Los 8,1 minutos citados proceden de datos de 18 países; no deben presentarse como el promedio oficial de cada país ni como un promedio mundial universal.', s:'Frontiers'},
+    {e:'🕐📆', t:'up',   h:'Una diferencia de un minuto se acumula', d:'Un minuto adicional de ducha cada día equivale a 365 minutos, es decir, más de seis horas al año por persona.', s:'Cálculo'},
+  ],
+  [ /* FILA 2 · MUNDO */
+    {e:'🌍🚰', t:'n',    h:'2.100 millones de personas sin agua potable gestionada de forma segura', d:'En 2024, esa era la cifra mundial estimada por el programa conjunto de la OMS y UNICEF.', s:'UNICEF DATA'},
+    {e:'🏞️🥤', t:'n',    h:'106 millones de personas dependían del agua superficial', d:'En 2024, esa cantidad de personas obtenía agua para beber directamente de ríos, lagos u otras fuentes superficiales.', s:'OMS'},
+    {e:'🚽🌍', t:'n',    h:'3.400 millones de personas sin saneamiento gestionado de forma segura', d:'La estimación mundial de 2024 muestra que el acceso al saneamiento sigue siendo un desafío enorme.', s:'UNICEF DATA'},
+    {e:'⛔🚽', t:'n',    h:'354 millones de personas practicaban la defecación al aire libre', d:'La estimación mundial de 2024 refleja la persistencia de desigualdades básicas en saneamiento.', s:'UNICEF DATA'},
+    {e:'🧼🏚️', t:'n',    h:'1.700 millones de personas sin servicios básicos de higiene en casa', d:'Esa fue la estimación mundial para 2024, según la actualización de OMS y UNICEF.', s:'WHO, UNICEF'},
+    {e:'🙌🚫', t:'n',    h:'611 millones de personas sin instalaciones para lavarse las manos', d:'En 2024, esa cantidad de personas carecía por completo de instalaciones para la higiene de manos en el hogar.', s:'UNICEF DATA'},
+    {e:'📈🚰', t:'up',   h:'74 % de cobertura mundial de agua potable gestionada de forma segura', d:'La cobertura aumentó del 68 % al 74 % entre 2015 y 2024.', s:'UNICEF DATA'},
+    {e:'📈🧴', t:'up',   h:'80 % de cobertura mundial de higiene básica', d:'La cobertura de servicios básicos de higiene pasó del 66 % en 2015 al 80 % en 2024.', s:'UNICEF DATA'},
+    {e:'🌾🚰', t:'n',    h:'60 % de cobertura de agua potable segura en zonas rurales', d:'En 2024, la cobertura rural de servicios de agua gestionados de forma segura llegó al 60 %, frente al 83 % en las zonas urbanas.', s:'UNICEF DATA'},
+    {e:'🏙️🚽', t:'n',    h:'El 66 % de la población urbana tenía saneamiento seguro', d:'En 2024, la cobertura urbana de saneamiento gestionado de forma segura era del 66 %, frente al 49 % en zonas rurales.', s:'UNICEF DATA'},
+    {e:'🇧🇷🚿', t:'n',    h:'Brasil: 99 % se ducha al menos una vez por semana', d:'Una recopilación de hábitos de baño por país publicada por World Population Review atribuye ese porcentaje a Brasil. Es una cifra de encuesta recopilada, no un indicador oficial de limpieza.', s:'World Population Review'},
+    {e:'🇫🇷🚿', t:'n',    h:'Francia: 97,3 % se ducha al menos una vez por semana', d:'Es el porcentaje que presenta la misma recopilación internacional de hábitos de baño.', s:'World Population Review'},
+    {e:'🇪🇸🚿', t:'n',    h:'España: 97,2 % se ducha al menos una vez por semana', d:'La cifra procede de la recopilación comparativa de hábitos de baño; no mide la limpieza corporal efectiva.', s:'World Population Review'},
+    {e:'🇩🇪🚿', t:'n',    h:'Alemania: 92,6 % se ducha al menos una vez por semana', d:'Es la proporción publicada en la misma recopilación de hábitos nacionales.', s:'World Population Review'},
+    {e:'🇺🇸🚿', t:'n',    h:'Estados Unidos: 90 % se ducha al menos una vez por semana', d:'La recopilación comparativa registra ese porcentaje para Estados Unidos. No debe confundirse con una clasificación sanitaria nacional.', s:'World Population Review'},
+    {e:'🇬🇧🚿', t:'n',    h:'Reino Unido: 83,4 % se ducha al menos una vez por semana', d:'Es la cifra recogida por World Population Review. Una menor frecuencia de ducha no permite concluir que una población sea más sucia.', s:'World Population Review'},
+    {e:'👩‍👧🪣', t:'n',    h:'Las mujeres y las niñas soportan una parte desproporcionada de la recolección de agua', d:'La OMS y UNICEF documentan desigualdades de género en las tareas de recolección de agua y en las responsabilidades domésticas relacionadas con la higiene.', s:'UNICEF-WHO'},
+    {e:'⚖️🧼', t:'n',    h:'No existe una clasificación mundial sólida de hombres y mujeres por limpieza corporal', d:'La OMS y UNICEF advierten que los datos desglosados por sexo para muchos indicadores de higiene siguen siendo limitados. No sería riguroso declarar un género como el más limpio.', s:'OMS'},
+    {e:'🕳️🚰', t:'n',    h:'Los pozos protegidos son una fuente de agua mejorada', d:'La clasificación internacional de UNICEF incluye los pozos excavados protegidos entre las fuentes mejoradas de agua potable. Eso no garantiza, por sí solo, que el agua esté libre de contaminación.', s:'UNICEF DATA'},
+    {e:'🏞️🧪', t:'n',    h:'Bañarse en un río no es automáticamente menos higiénico que hacerlo en una ducha', d:'La seguridad depende de la calidad microbiológica y química del agua y de las condiciones de exposición. El agua superficial sin tratar no debe suponerse potable ni segura para la higiene.', s:'OMS'},
+  ],
+];
+
+const TK_THEMES = {
+  clasico:{ bg:'#0A0A0C', text:'#FFFFFF', l1:'#0B4DBB', l2:'#D01F2E' },
+  azul:   { bg:'#062A6B', text:'#FFFFFF', l1:'#D01F2E', l2:'#FFFFFF' },
+  rojo:   { bg:'#160407', text:'#FFFFFF', l1:'#D01F2E', l2:'#0B4DBB' },
+  blanco: { bg:'#FFFFFF', text:'#0A0A0C', l1:'#0B4DBB', l2:'#D01F2E' },
+};
+const TK_DEFAULT = {
+  on:true, pos:'bottom', s1:55, s2:95, fs:14,
+  theme:'clasico', colors:{...TK_THEMES.clasico},
+  content:'full', src:true, pause:true, opposite:false, zoom:true,
+};
+const tk = { ...TK_DEFAULT, colors:{...TK_DEFAULT.colors} };
+const TK_ARROW = { up:'▲', down:'▼', n:'◆' };
+
+const TK = { rows:[], last:0, rt:null };
+document.querySelectorAll('.tk-row').forEach((el, i) => {
+  const r = { el, i, track:el.querySelector('.tk-track'), view:el.querySelector('.tk-view'), pos:0, W:0, hover:false };
+  el.addEventListener('mouseenter', () => { r.hover = true; });
+  el.addEventListener('mouseleave', () => { r.hover = false; });
+  TK.rows.push(r);
+});
+
+function tkContrast(hex){
+  let h = hex.replace('#','');
+  if (h.length === 3) h = h.split('').map(x => x + x).join('');
+  const n = parseInt(h, 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+  return (0.2126*r + 0.7152*g + 0.0722*b) / 255 > 0.6 ? '#0A0A0C' : '#FFFFFF';
+}
+function tkSave(){ try{ localStorage.setItem('duchometro_tk', JSON.stringify(tk)); }catch(_){} }
+function tkLoad(){
+  try{
+    const j = JSON.parse(localStorage.getItem('duchometro_tk') || 'null');
+    if (j && typeof j === 'object'){
+      Object.assign(tk, j);
+      tk.colors = Object.assign({}, TK_THEMES.clasico, j.colors || {});
+    }
+  }catch(_){}
+}
+
+function tkItemHTML(it){
+  return `<span class="tk-item"><span class="ie">${it.e}</span>` +
+         `<span class="tr ${it.t}">${TK_ARROW[it.t]}</span>` +
+         `<span class="hd">${it.h}</span>` +
+         `<span class="dt">${it.d}</span>` +
+         `<i class="sr">${it.s}</i></span>`;
+}
+function tkSetHTML(i){ return `<div class="tk-set">${TK_DATA[i].map(tkItemHTML).join('')}</div>`; }
+
+function tkMeasure(){
+  TK.rows.forEach(r => {
+    const oldW = r.W;
+    r.track.innerHTML = tkSetHTML(r.i);
+    const set = r.track.firstElementChild;
+    const W = set.offsetWidth, cw = r.view.offsetWidth;
+    if (!W || !cw){ r.W = 0; return; }
+    const copies = Math.ceil(cw / W) + 1;
+    for (let k = 1; k < copies; k++) r.track.appendChild(set.cloneNode(true));
+    r.pos = oldW ? (r.pos / oldW) * W : 0;
+    r.W = W;
+  });
+}
+function tkMeasureSoon(){ clearTimeout(TK.rt); TK.rt = setTimeout(tkMeasure, 120); }
+
+function tkReserve(){
+  const el = $('ticker'), b = document.body.style;
+  let top = 0, bot = 0;
+  if (tk.on && el.classList.contains('pos-top'))    top = el.offsetHeight;
+  if (tk.on && el.classList.contains('pos-bottom')) bot = el.offsetHeight;
+  b.setProperty('--tk-top', top + 'px');
+  b.setProperty('--tk-bot', bot + 'px');
+}
+
+function tkPlace(){
+  const el = $('ticker');
+  el.classList.remove('pos-top','pos-bottom','pos-inline');
+  el.classList.add('pos-' + tk.pos);
+  if (tk.pos === 'inline') document.querySelector('.top').after(el);
+  else document.body.appendChild(el);
+}
+
+function tkApplyStyle(){
+  const el = $('ticker'), c = tk.colors;
+  el.style.setProperty('--tk-bg', c.bg);
+  el.style.setProperty('--tk-text', c.text);
+  el.style.setProperty('--tk-l1', c.l1);
+  el.style.setProperty('--tk-l2', c.l2);
+  el.style.setProperty('--tk-l1t', tkContrast(c.l1));
+  el.style.setProperty('--tk-l2t', tkContrast(c.l2));
+  el.style.setProperty('--tk-fs', tk.fs);
+  el.classList.toggle('heads', tk.content === 'heads');
+  el.classList.toggle('nosrc', !tk.src);
+  document.body.classList.toggle('nozoom', !tk.zoom);
+}
+
+function tkApply(remeasure){
+  const el = $('ticker');
+  tkApplyStyle();
+  tkPlace();
+  el.hidden = !tk.on;
+  tkReserve();
+  if (remeasure) tkMeasure();
+}
+
+function tkSyncUI(){
+  const setSw = (id, v) => $(id).setAttribute('aria-checked', String(!!v));
+  setSw('tkOn', tk.on); setSw('tkSrc', tk.src); setSw('tkPause', tk.pause);
+  setSw('tkOpp', tk.opposite); setSw('tkZoom', tk.zoom);
+  document.querySelectorAll('#tkPosChips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.pos === tk.pos)));
+  document.querySelectorAll('#tkContentChips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.content === tk.content)));
+  document.querySelectorAll('#tkThemeChips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.tkt === tk.theme)));
+  $('tkS1').value = tk.s1; $('tkS1v').textContent = tk.s1;
+  $('tkS2').value = tk.s2; $('tkS2v').textContent = tk.s2;
+  $('tkFs').value = tk.fs; $('tkFsv').textContent = tk.fs + ' px';
+  ['bg','text','l1','l2'].forEach(k => { $('tkC_' + k).value = tk.colors[k]; });
+}
+
+/* ── Animación: posición acumulada por tiempo → velocidad suave y sin saltos ── */
+function tkLoop(t){
+  const dt = Math.min(0.05, Math.max(0, (t - TK.last) / 1000));
+  TK.last = t;
+  if (tk.on){
+    TK.rows.forEach((r, i) => {
+      if (!r.W) return;
+      if (!(tk.pause && r.hover)) r.pos = (r.pos + (i ? tk.s2 : tk.s1) * dt) % r.W;
+      const rightward = (i === 1 && tk.opposite);
+      const x = rightward ? r.pos - r.W : -r.pos;
+      r.track.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
+    });
+  }
+  requestAnimationFrame(tkLoop);
+}
+
+/* ── Eventos de ajustes ── */
+function tkBindSwitch(id, key, fn){
+  $(id).addEventListener('click', () => {
+    tk[key] = !tk[key];
+    $(id).setAttribute('aria-checked', String(tk[key]));
+    tkSave(); fn && fn();
+  });
+}
+tkBindSwitch('tkOn',    'on',       () => tkApply(true));
+tkBindSwitch('tkSrc',   'src',      () => tkApply(true));
+tkBindSwitch('tkPause', 'pause');
+tkBindSwitch('tkOpp',   'opposite');
+tkBindSwitch('tkZoom',  'zoom',     () => { tkApplyStyle(); tkMeasureSoon(); });
+
+$('tkPosChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  tk.pos = b.dataset.pos; tkSyncUI(); tkSave(); tkApply(true);
+});
+$('tkContentChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  tk.content = b.dataset.content; tkSyncUI(); tkSave(); tkApply(true);
+});
+$('tkThemeChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  tk.theme = b.dataset.tkt; tk.colors = { ...TK_THEMES[tk.theme] };
+  tkSyncUI(); tkSave(); tkApplyStyle();
+});
+['bg','text','l1','l2'].forEach(k => {
+  $('tkC_' + k).addEventListener('input', e => {
+    tk.colors[k] = e.target.value; tk.theme = 'custom';
+    document.querySelectorAll('#tkThemeChips .chip').forEach(c => c.setAttribute('aria-pressed','false'));
+    tkSave(); tkApplyStyle();
+  });
+});
+$('tkS1').addEventListener('input', e => { tk.s1 = +e.target.value; $('tkS1v').textContent = tk.s1; tkSave(); });
+$('tkS2').addEventListener('input', e => { tk.s2 = +e.target.value; $('tkS2v').textContent = tk.s2; tkSave(); });
+$('tkFs').addEventListener('input', e => {
+  tk.fs = +e.target.value; $('tkFsv').textContent = tk.fs + ' px';
+  tkSave(); tkApplyStyle(); tkReserve(); tkMeasureSoon();
+});
+$('tkReset').addEventListener('click', () => {
+  Object.assign(tk, TK_DEFAULT, { colors:{ ...TK_DEFAULT.colors } });
+  tkSyncUI(); tkSave(); tkApply(true);
+});
+
+window.addEventListener('resize', () => { tkReserve(); tkMeasureSoon(); });
+if ('ResizeObserver' in window){
+  const ro = new ResizeObserver(() => { tkReserve(); tkMeasureSoon(); });
+  TK.rows.forEach(r => ro.observe(r.view));
+}
+
+/* ── Arranque ── */
+tkLoad();
+tkSyncUI();
+tkApply(true);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(tkMeasureSoon);
+window.addEventListener('load', tkMeasureSoon);
+requestAnimationFrame(t => { TK.last = t; requestAnimationFrame(tkLoop); });
 </script>
 </body>
 </html>
